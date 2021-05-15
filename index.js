@@ -6,6 +6,6 @@ const app = express()
 const server = app.listen(3001);
 const io = socketio(server);
 
-mongoose.connect("mongodb://localhost:27017/typeRacingClone", {useNewUrlParser: true, useUnifiedTopology: true}, () => {
+mongoose.connect("mongodb://localhost:27017/typeRacingClone", { useNewUrlParser: true, useUnifiedTopology: true }, () => {
     console.log("connected to database")
 })
