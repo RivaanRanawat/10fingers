@@ -1,7 +1,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const socketio = require("socket.io");
-
+const Game = require("./models/Game");
+const getSentence = require("./api/sentenceApi");
 const app = express()
 const server = app.listen(3001);
 const io = socketio(server);
