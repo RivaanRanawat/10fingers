@@ -13,6 +13,27 @@ mongoose.connect("mongodb://localhost:27017/typeRacingClone", { useNewUrlParser:
 })
 
 io.on("connection", (socket) => {
+
+    socket.on("timer", async ({ playerId, gameID }) => {
+        let countDown = 5;
+        let game = await Game.findById(gameID);
+        let player = game.players.id(playerId);
+        if (player.isPartyLeader) {
+            let timerId = setInterval(async () => {
+                if(countDown>=0) {
+                    io.to(gameID).emit("timer", { countDown, msg: "Game Starting" })
+                    countDown--;
+                } else {
+                    game.isOpen = false;
+                    game = await game.save()
+                    socket.to(gameID).emit("updateGame", game)
+                    // startGameClock(gameId)
+                    clearInterval(timerId)
+                }
+            }, 1000)
+        }
+    })
+
     socket.on("create-game", async (nickname) => {
         try {
             let game = new Game();

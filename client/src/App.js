@@ -5,6 +5,7 @@ import GameMenu from "./components/GameMenu";
 import history from "./history";
 import CreateGame from "./components/CreateGame";
 import JoinGame from "./components/JoinGame";
+import TypeRacer from "./components/TypeRacer";
 
 function App() {
   const [gameState, setGameState] = useState({_id: "", players:[], isJoin: false, words:[]})
@@ -31,6 +32,7 @@ function App() {
         <Route exact path="/" component={GameMenu}/>
         <Route exact path="/game/create" component={CreateGame}/>
         <Route exact path="/game/join" component={JoinGame}/>
+        <Route exact path="/game/:gameId" render={props => <TypeRacer {...props} gameState={gameState}/>} />
       </Switch>
     </Router>
   );
