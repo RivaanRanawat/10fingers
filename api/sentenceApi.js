@@ -7,7 +7,7 @@ const getSentence = async () => {
         }
     })
 
-    return jokeData.data.joke
+    return jokeData.data.joke.split(" ")
 }
 
 module.exports = getSentence;
