@@ -14,6 +14,27 @@ mongoose.connect("mongodb://localhost:27017/typeRacingClone", { useNewUrlParser:
 
 io.on("connection", (socket) => {
 
+    socket.on("userInput", async ({userInput, gameID}) => {
+        let game = await Game.findById(gameID);
+        if(!game.isJoin && !game.isOver) {
+            let player = game.players.find(player => player.socketID === socket.id);
+            if(game.words[player.currentWordIndex] === userInput) {
+                player.currentWordIndex ++;
+                if(player.currentWordIndex !== game.words.length) {
+                    game = await game.save();
+                    io.to(gameID).emit("updateGame", game);
+                } else {
+                    let endTime = new Date().getTime();
+                    let {startTime} = game;
+                    player.WPM = calculateWPM(endTime, startTime, player)
+                    game = await game.save()
+                    socket.emit("done")
+                    io.to(gameID).emit("updateGame", game);
+                }
+            }
+        }
+    })
+
     socket.on("timer", async ({ playerId, gameID }) => {
         let countDown = 5;
         let game = await Game.findById(gameID);
