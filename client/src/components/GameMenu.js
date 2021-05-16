@@ -7,8 +7,8 @@ const GameMenu = props => {
     return (
         <div className="text-center">
             <h1>Welcome to 10Fingers</h1>
-            <div className="p-3"><button className="btn btn-primary btn-lg" type="button" onClick={() => history.push("/game/create")}>Create Game</button></div>
-            <div><button className="btn btn-primary btn-lg" type="button" onClick={() => history.push("/game/join")}>Join Game</button></div>
+            <button className="btn btn-primary btn-lg" style={{marginRight: "0.4rem"}} type="button" onClick={() => history.push("/game/create")}>Create Game</button>
+            <button className="btn btn-primary btn-lg" type="button" onClick={() => history.push("/game/join")}>Join Game</button>
         </div>
     )
 }
