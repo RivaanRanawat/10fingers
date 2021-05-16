@@ -14,7 +14,7 @@ mongoose.connect("mongodb://localhost:27017/typeRacingClone", { useNewUrlParser:
 
 io.on("connection", (socket) => {
     socket.on("create-game", async (nickname) => {
-        try{
+        try {
             let game = new Game();
             const sentence = await getSentence()
             game.words = sentence
@@ -29,8 +29,27 @@ io.on("connection", (socket) => {
             const gameId = game._id.toString()
             socket.join(gameId);
             io.to(gameId).emit("updateGame", game)
-        } catch(err) {
+        } catch (err) {
             console.log(err)
+        }
+    })
+
+    socket.on("join-game", async ({ nickname, gameId }) => {
+        try {
+            let game = await Game.findById(gameId);
+            if (game.isJoin) {
+                const id = game._id.toString()
+                let player = {
+                    nickname,
+                    socketID: socket.id,
+                }
+                socket.join(id);
+                game.players.push(player)
+                game = await game.save()
+                io.to(gameId).emit("updateGame", game);
+            }
+        } catch (err) {
+            console.log(err);
         }
     })
 })
