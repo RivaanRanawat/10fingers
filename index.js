@@ -139,7 +139,7 @@ const calculateTime = (time) => {
 
 const calculateWPM = (endTime, startTime, player) => {
     // 40 wpm -> 60/1.5
-    const timeTakenInSec = (startTime - endTime) / 1000;
+    const timeTakenInSec = (endTime - startTime) / 1000;
     const timeTaken = timeTakenInSec/60;
     let wordsTyped = player.currentWordIndex;
     const WPM = Math.floor(wordsTyped/timeTaken)
