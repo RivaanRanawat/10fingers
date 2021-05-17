@@ -14,18 +14,18 @@ mongoose.connect("mongodb://localhost:27017/typeRacingClone", { useNewUrlParser:
 
 io.on("connection", (socket) => {
 
-    socket.on("userInput", async ({userInput, gameID}) => {
+    socket.on("userInput", async ({ userInput, gameID }) => {
         let game = await Game.findById(gameID);
-        if(!game.isJoin && !game.isOver) {
+        if (!game.isJoin && !game.isOver) {
             let player = game.players.find(player => player.socketID === socket.id);
-            if(game.words[player.currentWordIndex] === userInput) {
-                player.currentWordIndex ++;
-                if(player.currentWordIndex !== game.words.length) {
+            if (game.words[player.currentWordIndex] === userInput) {
+                player.currentWordIndex++;
+                if (player.currentWordIndex !== game.words.length) {
                     game = await game.save();
                     io.to(gameID).emit("updateGame", game);
                 } else {
                     let endTime = new Date().getTime();
-                    let {startTime} = game;
+                    let { startTime } = game;
                     player.WPM = calculateWPM(endTime, startTime, player)
                     game = await game.save()
                     socket.emit("done")
@@ -78,6 +78,10 @@ io.on("connection", (socket) => {
 
     socket.on("join-game", async ({ nickname, gameId }) => {
         try {
+            if (!gameId.match(/^[0-9a-fA-F]{24}$/)) {
+                socket.emit("notCorrectGame", "Please enter a valid game ID")
+                return;
+            }
             let game = await Game.findById(gameId);
             if (game.isJoin) {
                 const id = game._id.toString()
@@ -89,6 +93,8 @@ io.on("connection", (socket) => {
                 game.players.push(player)
                 game = await game.save()
                 io.to(gameId).emit("updateGame", game);
+            } else {
+                socket.emit("notCorrectGame", "The Game is in progress, please try later!")
             }
         } catch (err) {
             console.log(err);
@@ -103,28 +109,28 @@ const startGameClock = async (gameID) => {
     let time = 120;
     // there is a noticeable delay so execute it immediately
     let timerId = setInterval(function gameIntervalFunc() {
-        if(time>=0) {
+        if (time >= 0) {
             const timeFormat = calculateTime(time);
-            io.to(gameID).emit("timer", {countDown: timeFormat, msg: "Time Remaining"})
+            io.to(gameID).emit("timer", { countDown: timeFormat, msg: "Time Remaining" })
             time--;
         } else {
             (async () => {
                 try {
                     let endTime = new Date().getTime();
                     let game = await Game.findById(gameID);
-                    let {startTime} = game;
+                    let { startTime } = game;
                     game.isOver = true;
                     game.players.forEach((player, index) => {
-                        if(player.WPM === -1)
+                        if (player.WPM === -1)
                             game.players[index].WPM = calculateWPM(endTime, startTime, player)
                     })
                     game = await game.save()
                     io.to(gameID).emit("updateGame", game);
                     clearInterval(timerId)
-                } catch(err) {
+                } catch (err) {
                     console.log(err)
                 }
-                
+
             })()
         }
         return gameIntervalFunc
@@ -140,8 +146,8 @@ const calculateTime = (time) => {
 const calculateWPM = (endTime, startTime, player) => {
     // 40 wpm -> 60/1.5
     const timeTakenInSec = (endTime - startTime) / 1000;
-    const timeTaken = timeTakenInSec/60;
+    const timeTaken = timeTakenInSec / 60;
     let wordsTyped = player.currentWordIndex;
-    const WPM = Math.floor(wordsTyped/timeTaken)
+    const WPM = Math.floor(wordsTyped / timeTaken)
     return WPM
 }
