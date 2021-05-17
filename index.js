@@ -5,10 +5,11 @@ const Game = require("./models/Game");
 const getSentence = require("./api/sentenceApi");
 
 const app = express()
-const expressServer = app.listen(3001);
+const port = process.env.port || 3001
+const expressServer = app.listen(port);
 const io = socketio(expressServer);
 
-mongoose.connect("mongodb://localhost:27017/typeRacingClone", { useNewUrlParser: true, useUnifiedTopology: true }, () => {
+mongoose.connect(process.env.MONGODB_URI|| "mongodb://localhost:27017/typeRacingClone", { useNewUrlParser: true, useUnifiedTopology: true }, () => {
     console.log("connected to database")
 })
 
